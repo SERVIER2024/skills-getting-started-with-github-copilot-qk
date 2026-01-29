@@ -77,3 +77,30 @@ def test_unregister_not_registered_student():
     assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "Student not registered for this activity"
+
+
+def test_signup_duplicate_registration():
+    """Test signing up a student who is already registered"""
+    # Reset activities to a known state
+    activities["Chess Club"]["participants"] = ["michael@mergington.edu", "daniel@mergington.edu"]
+    
+    response = client.post(
+        "/activities/Chess Club/signup?email=michael@mergington.edu"
+    )
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == "Student already registered for this activity"
+
+
+def test_signup_at_max_capacity():
+    """Test signing up when activity is at maximum capacity"""
+    # Reset activities and fill to capacity
+    activities["Chess Club"]["participants"] = [f"student{i}@mergington.edu" for i in range(12)]
+    activities["Chess Club"]["max_participants"] = 12
+    
+    response = client.post(
+        "/activities/Chess Club/signup?email=newstudent@mergington.edu"
+    )
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == "Activity is at maximum capacity"

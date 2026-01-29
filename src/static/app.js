@@ -12,6 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Clear loading message
       activitiesList.innerHTML = "";
+      
+      // Clear existing dropdown options except the first one
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -20,29 +23,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
-        // Build participants list
-        let participantsHTML = '';
-        if (details.participants.length > 0) {
-          participantsHTML = `
-            <p><strong>Participants:</strong></p>
-            <ul class="participants-list">
-              ${details.participants.map(email => `
-                <li>
-                  ${email} 
-                  <button class="unregister-btn" data-activity="${name}" data-email="${email}">取消注册</button>
-                </li>
-              `).join('')}
-            </ul>
-          `;
-        }
+        // Create activity title
+        const title = document.createElement("h4");
+        title.textContent = name;
+        activityCard.appendChild(title);
 
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          ${participantsHTML}
-        `;
+        // Create description
+        const desc = document.createElement("p");
+        desc.textContent = details.description;
+        activityCard.appendChild(desc);
+
+        // Create schedule
+        const schedule = document.createElement("p");
+        const scheduleStrong = document.createElement("strong");
+        scheduleStrong.textContent = "Schedule:";
+        schedule.appendChild(scheduleStrong);
+        schedule.appendChild(document.createTextNode(" " + details.schedule));
+        activityCard.appendChild(schedule);
+
+        // Create availability
+        const availability = document.createElement("p");
+        const availStrong = document.createElement("strong");
+        availStrong.textContent = "Availability:";
+        availability.appendChild(availStrong);
+        availability.appendChild(document.createTextNode(" " + spotsLeft + " spots left"));
+        activityCard.appendChild(availability);
+
+        // Build participants list
+        if (details.participants.length > 0) {
+          const participantsTitle = document.createElement("p");
+          const titleStrong = document.createElement("strong");
+          titleStrong.textContent = "Participants:";
+          participantsTitle.appendChild(titleStrong);
+          activityCard.appendChild(participantsTitle);
+
+          const participantsList = document.createElement("ul");
+          participantsList.className = "participants-list";
+
+          details.participants.forEach(email => {
+            const li = document.createElement("li");
+            li.textContent = email + " ";
+
+            const unregisterBtn = document.createElement("button");
+            unregisterBtn.className = "unregister-btn";
+            unregisterBtn.textContent = "取消注册";
+            unregisterBtn.setAttribute("data-activity", name);
+            unregisterBtn.setAttribute("data-email", email);
+
+            li.appendChild(unregisterBtn);
+            participantsList.appendChild(li);
+          });
+
+          activityCard.appendChild(participantsList);
+        }
 
         activitiesList.appendChild(activityCard);
 
